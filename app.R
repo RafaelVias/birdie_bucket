@@ -7,8 +7,8 @@ library(scales)
 ui <- fluidPage(
   titlePanel(
     div(
-      tags$img(height = "50px", style = "margin-right: 0px;"),
-      "Golfsagan - Birdie bucket"
+      tags$img(height = "0px", style = "margin-left: 0px;"),
+      HTML("Birdie bucket")
     )
   ),
   
