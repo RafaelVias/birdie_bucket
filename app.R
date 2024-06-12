@@ -20,14 +20,14 @@ ui <- fluidPage(
       actionButton("add_player", "Add Player"),
       br(),
       br(),
-      textOutput("remove_instruction"),
-      uiOutput("remove_buttons"),
       actionButton("draw_winner", "Draw Winner"),
       br(),
       br(),
       tableOutput("player_table"),
       br(),
-      div(textOutput("winner_name"), style = "font-size: 20px;")  # Larger font size for winner text
+      div(textOutput("winner_name"), style = "font-size: 20px;"),  # Larger font size for winner text
+      br(),
+      textOutput("last_three_winners")  # Display last three winners
     ),
     
     mainPanel(
@@ -43,7 +43,7 @@ ui <- fluidPage(
 
 # Define server logic for the app
 server <- function(input, output, session) {
-  # Reactive values to store player data
+  # Reactive values to store player data and last three winners
   players <- reactiveVal(data.frame(
     Name = character(),
     Handicap = numeric(),
@@ -51,6 +51,8 @@ server <- function(input, output, session) {
     Tickets = numeric(),
     stringsAsFactors = FALSE
   ))
+  
+  last_three_winners <- reactiveVal(character(0))
   
   # Add player data to the reactive values
   observeEvent(input$add_player, {
@@ -75,25 +77,6 @@ server <- function(input, output, session) {
     players(players_df)
   })
   
-  # Dynamically create remove buttons for each player
-  output$remove_buttons <- renderUI({
-    players_df <- players()
-    buttons <- lapply(players_df$Name, function(name) {
-      actionButton(inputId = paste0("remove_", name), label = "Remove")
-    })
-    do.call(tagList, buttons)
-  })
-  
-  # Display the remove instruction based on player count
-  output$remove_instruction <- renderText({
-    players_df <- players()
-    if (nrow(players_df) > 0) {
-      "Click 'Remove' button to remove a player:"
-    } else {
-      ""
-    }
-  })
-  
   # Remove player data from the reactive values
   observeEvent(input$draw_winner, {
     player_data <- players()
@@ -102,6 +85,15 @@ server <- function(input, output, session) {
     if (total_tickets > 0) {
       winner_index <- sample(1:nrow(player_data), size = 1, prob = player_data$Tickets)
       winner <- player_data$Name[winner_index]
+      
+      # Update last three winners
+      last_three <- last_three_winners()
+      if (length(last_three) >= 3) {
+        last_three <- c(last_three[-1], winner)
+      } else {
+        last_three <- c(last_three, winner)
+      }
+      last_three_winners(last_three)
     } else {
       winner <- "No players added."
     }
@@ -129,6 +121,16 @@ server <- function(input, output, session) {
     }
     players_df
   }, sanitize.text.function = function(x) x)
+  
+  # Display last three winners
+  output$last_three_winners <- renderText({
+    last_three <- last_three_winners()
+    if (length(last_three) > 0) {
+      paste("Last Three Winners:", paste(last_three, collapse = ", "))
+    } else {
+      ""
+    }
+  })
   
   # Plotting the probability mass function
   output$prob_plot <- renderPlot({
