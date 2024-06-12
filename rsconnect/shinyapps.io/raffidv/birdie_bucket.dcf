@@ -1,0 +1,12 @@
+name: birdie_bucket
+title: birdie_bucket
+username: raffidv
+account: raffidv
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12173610
+bundleId: 8734698
+url: https://raffidv.shinyapps.io/birdie_bucket/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
